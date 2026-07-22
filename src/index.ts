@@ -12,6 +12,16 @@ app.get('/products', (c) => {
   return c.json(produtcs);
 });
 
+app.get('/products/:id', (c) => {
+  const { id } = c.req.param();
+  const product = produtcs.find((p) => p.id === id);
+  if (!product) {
+    return c.json({ message: 'Product not found' }, 404);
+  }
+  
+  return c.json(product);
+});
+
 serve(
   {
     fetch: app.fetch,
