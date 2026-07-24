@@ -3,7 +3,18 @@ import { Hono } from 'hono';
 
 const app = new Hono();
 
-const produtcs = [
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface CreateProductRequest {
+  name: string;
+  price: number;
+}
+
+const produtcs: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
   { id: '2', name: 'Mouse', price: 200 },
 ];
@@ -24,7 +35,7 @@ app.get('/products/:id', (c) => {
 
 app.post('/products', async (c) => {
   // lê e converte o corpo da requisição para JSON
-  const body = await c.req.json();
+  const body = await c.req.json<CreateProductRequest>();
 
   // cria um novo produto com base nos dados recebidos
   const newProduct = {
