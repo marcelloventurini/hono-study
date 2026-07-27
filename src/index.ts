@@ -55,6 +55,26 @@ app.post('/products', async (c) => {
   return c.json(newProduct, 201);
 });
 
+app.delete('/products/:id', (c) => {
+  const { id } = c.req.param();
+
+  // encontra o índice do produto no array com base no ID fornecido
+  const productIndex = produtcs.findIndex((p) => p.id === id);
+  
+  // verifica se o produto existe antes de tentar deletá-lo
+  if (productIndex === -1) {
+    return c.json({ message: 'Product not found' }, 404);
+  }
+
+  // remove o produto do array e armazena o produto deletado
+  const deletedProduct = produtcs.splice(productIndex, 1)[0];
+
+  // retorna o produto deletado
+  return c.json({
+    message: `Product ${deletedProduct.name} deleted successfully`,
+  });
+});
+
 serve(
   {
     fetch: app.fetch,
