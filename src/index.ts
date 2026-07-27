@@ -1,7 +1,15 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { logger } from 'hono/logger';
 
 const app = new Hono();
+
+app.use('*', logger());
+
+app.onError((err, c) => {
+  console.error('[erro na aplicação]:', err);
+  return c.json({ message: 'Internal Server Error' }, 500);
+});
 
 interface Product {
   id: string;
@@ -99,6 +107,11 @@ app.delete('/products/:id', (c) => {
   return c.json({
     message: `Product ${deletedProduct.name} deleted successfully`,
   });
+});
+
+app.get('/error', (c) => {
+  // lança um erro proposital para testar o middleware de tratamento de erros
+  throw new Error('This is a test error');
 });
 
 serve(
