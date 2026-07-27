@@ -14,18 +14,18 @@ interface CreateProductRequest {
   price: number;
 }
 
-const produtcs: Product[] = [
+const products: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
   { id: '2', name: 'Mouse', price: 200 },
 ];
 
 app.get('/products', (c) => {
-  return c.json(produtcs);
+  return c.json(products);
 });
 
 app.get('/products/:id', (c) => {
   const { id } = c.req.param();
-  const product = produtcs.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id);
   if (!product) {
     return c.json({ message: 'Product not found' }, 404);
   }
@@ -39,7 +39,7 @@ app.post('/products', async (c) => {
 
   // cria um novo produto com base nos dados recebidos
   const newProduct = {
-    id: String(produtcs.length + 1), // gera um novo ID baseado no tamanho do array
+    id: String(products.length + 1), // gera um novo ID baseado no tamanho do array
     name: body.name,
     price: body.price,
   };
@@ -49,17 +49,43 @@ app.post('/products', async (c) => {
   }
 
   // adiciona o novo produto ao array de produtos
-  produtcs.push(newProduct);
+  products.push(newProduct);
 
   // retorna o novo produto criado com status 201 (Created)
   return c.json(newProduct, 201);
 });
 
+app.put('/products/:id', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json<CreateProductRequest>();
+
+  // encontra o produto no array com base no ID fornecido
+  const productIndex = products.findIndex((p) => p.id === id);
+  
+  // verifica se o produto existe antes de tentar atualizá-lo
+  if (productIndex === -1) {
+    return c.json({ message: 'Product not found' }, 404);
+  }
+
+  // atualiza o produto com os novos dados fornecidos
+  const updatedProduct = {
+    ...products[productIndex],
+    name: body.name,
+    price: body.price,
+  };
+
+  // substitui o produto antigo pelo atualizado no array
+  products[productIndex] = updatedProduct;
+
+  // retorna o produto atualizado
+  return c.json(updatedProduct);
+})
+
 app.delete('/products/:id', (c) => {
   const { id } = c.req.param();
 
   // encontra o índice do produto no array com base no ID fornecido
-  const productIndex = produtcs.findIndex((p) => p.id === id);
+  const productIndex = products.findIndex((p) => p.id === id);
   
   // verifica se o produto existe antes de tentar deletá-lo
   if (productIndex === -1) {
@@ -67,7 +93,7 @@ app.delete('/products/:id', (c) => {
   }
 
   // remove o produto do array e armazena o produto deletado
-  const deletedProduct = produtcs.splice(productIndex, 1)[0];
+  const deletedProduct = products.splice(productIndex, 1)[0];
 
   // retorna o produto deletado
   return c.json({
