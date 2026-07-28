@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { createMiddleware } from 'hono/factory';
 import { logger } from 'hono/logger';
 
 const app = new Hono();
@@ -9,6 +10,21 @@ app.use('*', logger());
 app.onError((err, c) => {
   console.error('[erro na aplicação]:', err);
   return c.json({ message: 'Internal Server Error' }, 500);
+});
+
+const secretKey = 'secret';
+
+const apiKeyAuth = createMiddleware(async (c, next) => {
+  // lendo e armazenando o cabeçalho http
+  const key = c.req.header('x-api-key');
+
+  // comparação entre os valores
+  if (key !== secretKey) {
+    return c.json({ message: 'unauthorized: invalid api key' }, 401);
+  }
+
+  // permitindo o acesso passando o controle adiante
+  await next();
 });
 
 interface Product {
@@ -41,7 +57,7 @@ app.get('/products/:id', (c) => {
   return c.json(product);
 });
 
-app.post('/products', async (c) => {
+app.post('/products', apiKeyAuth, async (c) => {
   // lê e converte o corpo da requisição para JSON
   const body = await c.req.json<CreateProductRequest>();
 
@@ -69,7 +85,7 @@ app.put('/products/:id', async (c) => {
 
   // encontra o produto no array com base no ID fornecido
   const productIndex = products.findIndex((p) => p.id === id);
-  
+
   // verifica se o produto existe antes de tentar atualizá-lo
   if (productIndex === -1) {
     return c.json({ message: 'Product not found' }, 404);
@@ -87,14 +103,14 @@ app.put('/products/:id', async (c) => {
 
   // retorna o produto atualizado
   return c.json(updatedProduct);
-})
+});
 
 app.delete('/products/:id', (c) => {
   const { id } = c.req.param();
 
   // encontra o índice do produto no array com base no ID fornecido
   const productIndex = products.findIndex((p) => p.id === id);
-  
+
   // verifica se o produto existe antes de tentar deletá-lo
   if (productIndex === -1) {
     return c.json({ message: 'Product not found' }, 404);
