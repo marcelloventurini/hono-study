@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createMiddleware } from 'hono/factory';
+import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
 
 export const productsRoutes = new Hono();
 
@@ -18,21 +18,6 @@ const products: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
   { id: '2', name: 'Mouse', price: 200 },
 ];
-
-const secretKey = 'secret';
-
-const apiKeyAuth = createMiddleware(async (c, next) => {
-  // lendo e armazenando o cabeçalho http
-  const key = c.req.header('x-api-key');
-
-  // comparação entre os valores
-  if (key !== secretKey) {
-    return c.json({ message: 'unauthorized: invalid api key' }, 401);
-  }
-
-  // permitindo o acesso passando o controle adiante
-  await next();
-});
 
 productsRoutes.get('/', (c) => {
   return c.json(products);
