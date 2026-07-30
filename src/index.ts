@@ -1,18 +1,15 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
+import { errorHandler } from './middlewares/on-error.handler.js';
 import { productsRoutes } from './routes/products.routes.js';
 
 const app = new Hono();
 
 app.use('*', logger());
+app.onError(errorHandler);
 
 app.route('/products', productsRoutes);
-
-app.onError((err, c) => {
-  console.error('[erro na aplicação]:', err);
-  return c.json({ message: 'Internal Server Error' }, 500);
-});
 
 app.get('/error', (c) => {
   // lança um erro proposital para testar o middleware de tratamento de erros
