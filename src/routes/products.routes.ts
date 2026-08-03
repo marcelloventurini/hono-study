@@ -1,18 +1,8 @@
 import { Hono } from 'hono';
 import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
+import type { CreateProductRequest, Product } from '../types/product.types.js';
 
 export const productsRoutes = new Hono();
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-}
-
-interface CreateProductRequest {
-  name: string;
-  price: number;
-}
 
 const products: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
