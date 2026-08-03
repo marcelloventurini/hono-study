@@ -2,18 +2,18 @@ import { Hono } from 'hono';
 import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
 import type { CreateProductRequest, Product } from '../types/product.types.js';
 
-export const productsRoutes = new Hono();
+const app = new Hono();
 
 const products: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
   { id: '2', name: 'Mouse', price: 200 },
 ];
 
-productsRoutes.get('/', (c) => {
+app.get('/', (c) => {
   return c.json(products);
 });
 
-productsRoutes.get('/:id', (c) => {
+app.get('/:id', (c) => {
   const { id } = c.req.param();
   const product = products.find((p) => p.id === id);
   if (!product) {
@@ -23,7 +23,7 @@ productsRoutes.get('/:id', (c) => {
   return c.json(product);
 });
 
-productsRoutes.post('/', apiKeyAuth, async (c) => {
+app.post('/', apiKeyAuth, async (c) => {
   // lê e converte o corpo da requisição para JSON
   const body = await c.req.json<CreateProductRequest>();
 
@@ -45,7 +45,7 @@ productsRoutes.post('/', apiKeyAuth, async (c) => {
   return c.json(newProduct, 201);
 });
 
-productsRoutes.put('/:id', async (c) => {
+app.put('/:id', async (c) => {
   const { id } = c.req.param();
   const body = await c.req.json<CreateProductRequest>();
 
@@ -71,7 +71,7 @@ productsRoutes.put('/:id', async (c) => {
   return c.json(updatedProduct);
 });
 
-productsRoutes.delete('/:id', (c) => {
+app.delete('/:id', (c) => {
   const { id } = c.req.param();
 
   // encontra o índice do produto no array com base no ID fornecido
@@ -90,3 +90,5 @@ productsRoutes.delete('/:id', (c) => {
     message: `Product ${deletedProduct.name} deleted successfully`,
   });
 });
+
+export { app as productsRoutes };
