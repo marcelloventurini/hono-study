@@ -4,7 +4,7 @@ import type { CreateProductRequest, Product } from '../types/product.types.js';
 
 const app = new Hono();
 
-const products: Product[] = [
+export const products: Product[] = [
   { id: '1', name: 'Teclado', price: 350 },
   { id: '2', name: 'Mouse', price: 200 },
 ];
