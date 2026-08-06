@@ -1,10 +1,13 @@
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-}
+import z from 'zod';
 
-export interface CreateProductRequest {
-  name: string;
-  price: number;
-}
+// schema do produto completo
+export const productSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  price: z.number().positive(),
+});
+
+// schema de criação
+export const createProductSchema = productSchema.omit({ id: true });
+
+export type Product = z.infer<typeof productSchema>;

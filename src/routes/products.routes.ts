@@ -1,6 +1,7 @@
+import { sValidator } from '@hono/standard-validator';
 import { Hono } from 'hono';
 import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
-import type { CreateProductRequest, Product } from '../types/product.types.js';
+import { createProductSchema, type Product } from '../types/product.types.js';
 
 const app = new Hono();
 
@@ -23,20 +24,15 @@ app.get('/:id', (c) => {
   return c.json(product);
 });
 
-app.post('/', apiKeyAuth, async (c) => {
+app.post('/', apiKeyAuth, sValidator('json', createProductSchema), (c) => {
   // lê e converte o corpo da requisição para JSON
-  const body = await c.req.json<CreateProductRequest>();
+  const body = c.req.valid('json');
 
   // cria um novo produto com base nos dados recebidos
   const newProduct = {
     id: String(products.length + 1), // gera um novo ID baseado no tamanho do array
-    name: body.name,
-    price: body.price,
+    ...body,
   };
-
-  if (!newProduct.name || !newProduct.price) {
-    return c.json({ message: 'Name and price are required' }, 400);
-  }
 
   // adiciona o novo produto ao array de produtos
   products.push(newProduct);
@@ -45,9 +41,10 @@ app.post('/', apiKeyAuth, async (c) => {
   return c.json(newProduct, 201);
 });
 
-app.put('/:id', async (c) => {
+// TODO testar
+app.put('/:id', sValidator('json', createProductSchema), (c) => {
   const { id } = c.req.param();
-  const body = await c.req.json<CreateProductRequest>();
+  const body = c.req.valid('json');
 
   // encontra o produto no array com base no ID fornecido
   const productIndex = products.findIndex((p) => p.id === id);
@@ -60,8 +57,9 @@ app.put('/:id', async (c) => {
   // atualiza o produto com os novos dados fornecidos
   const updatedProduct = {
     ...products[productIndex],
-    name: body.name,
-    price: body.price,
+    // name: body.name,
+    // price: body.price,
+    ...body,
   };
 
   // substitui o produto antigo pelo atualizado no array
