@@ -1,21 +1,8 @@
 import { Hono } from 'hono';
 import { products } from './products.routes.js';
+import type { CreateSaleRequest, Sale } from '../types/sale.types.js';
 
 const app = new Hono();
-
-interface Sale {
-  id: string;
-  items: { productId: string; quantity: number; price: number }[];
-  total: number;
-}
-
-// necessário para realizar uma venda: produtos, quantidade de produtos, preço dos produtos
-interface CreateSaleRequest {
-  items: {
-    productId: string;
-    quantity: number;
-  }[];
-}
 
 const sales: Sale[] = [
   {
