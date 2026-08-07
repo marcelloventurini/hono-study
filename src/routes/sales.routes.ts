@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { products } from './products.routes.js';
-import type { CreateSaleRequest, Sale } from '../types/sale.types.js';
+import { createSaleSchema, type Sale } from '../types/sale.types.js';
+import { sValidator } from '@hono/standard-validator';
 
 const app = new Hono();
 
@@ -16,8 +17,8 @@ app.get('/', (c) => {
   return c.json(sales);
 });
 
-app.post('/', async (c) => {
-  const body = await c.req.json<CreateSaleRequest>();
+app.post('/', sValidator('json', createSaleSchema), (c) => {
+  const body = c.req.valid('json');
   // array usado para armazenar os items da venda
   const saleItems = [];
   let total = 0;
