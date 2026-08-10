@@ -12,9 +12,14 @@ export const saleSchema = z.object({
   total: z.number(),
 });
 
+// o `.shape` é como o Zod nos dá acesso direto às propriedades do objeto
+// `saleSchema.shape.items` pega especificamente o schema que define o array de itens
 export const itemSchema = saleSchema.shape.items.element;
+
+// criando um novo esquema sem o campo `price`
 export const createItemSchema = itemSchema.omit({ price: true });
 
+// substitui apenas o campo `items` no schema pai
 export const createSaleSchema = saleSchema
   .extend({
     items: z.array(createItemSchema),
@@ -22,17 +27,3 @@ export const createSaleSchema = saleSchema
   .omit({ id: true, total: true });
 
 export type Sale = z.infer<typeof saleSchema>;
-
-// export interface Sale {
-//   id: string;
-//   items: { productId: string; quantity: number; price: number }[];
-//   total: number;
-// }
-
-// necessário para realizar uma venda: produtos, quantidade de produtos, preço dos produtos
-// export interface CreateSaleRequest {
-//   items: {
-//     productId: string;
-//     quantity: number;
-//   }[];
-// }

@@ -6,7 +6,7 @@ import {
   idParamSchema,
   updateProductSchema,
   type Product,
-} from '../types/product.types.js';
+} from '../schemas/product.schemas.js';
 
 const app = new Hono();
 
