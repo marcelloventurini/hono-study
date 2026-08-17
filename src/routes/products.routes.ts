@@ -6,7 +6,7 @@ import {
   idParamSchema,
   updateProductSchema,
   type Product,
-} from '../schemas/product.schemas.js';
+} from '../validators/product.validator.js';
 
 const app = new Hono();
 

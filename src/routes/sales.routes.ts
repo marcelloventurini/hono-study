@@ -1,6 +1,6 @@
 import { sValidator } from '@hono/standard-validator';
 import { Hono } from 'hono';
-import { createSaleSchema, type Sale } from '../schemas/sale.schemas.js';
+import { createSaleSchema, type Sale } from '../validators/sale.validator.js';
 import { products } from './products.routes.js';
 
 const app = new Hono();
