@@ -14,6 +14,7 @@ node_modules/
 # env
 .env
 .env.production
+.env.local
 
 # logs
 logs/
@@ -26,3 +27,9 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+#db
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
