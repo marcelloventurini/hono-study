@@ -1,9 +1,7 @@
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/libsql';
+import * as schema from './schemas/index.schemas.js';
 
-// abre a conexão com o sqlite
-const sqlite = new Database(process.env.DB_URL!);
-
-// instancia o cliente do Drizzle passando a conexão
-export const db = drizzle({ client: sqlite });
+const client = createClient({ url: process.env.DB_URL! });
+export const db = drizzle(client, { schema });
