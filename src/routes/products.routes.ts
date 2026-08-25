@@ -3,7 +3,11 @@ import { Hono } from 'hono';
 import { db } from '../db/index.db.js';
 import { products } from '../db/schemas/products.schemas.js';
 import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
-import { createProductSchema } from '../validators/product.validator.js';
+import {
+  createProductSchema,
+  idParamSchema,
+} from '../validators/product.validator.js';
+import { eq } from 'drizzle-orm';
 
 const app = new Hono();
 
@@ -12,15 +16,16 @@ app.get('/', async (c) => {
   return c.json(products);
 });
 
-// app.get('/:id', sValidator('param', idParamSchema), (c) => {
-//   const { id } = c.req.valid('param');
-//   const product = products.find((p) => p.id === id);
-//   if (!product) {
-//     return c.json({ message: 'Product not found' }, 404);
-//   }
+app.get('/:id', sValidator('param', idParamSchema), async (c) => {
+  const { id } = c.req.valid('param');
+  const product = await db.query.products.findFirst({ where: eq(products.id, id) });
+  
+  if (!product) {
+    return c.json({ message: 'Product not found' }, 404);
+  }
 
-//   return c.json(product);
-// });
+  return c.json(product);
+});
 
 app.post(
   '/',
