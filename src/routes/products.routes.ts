@@ -1,4 +1,5 @@
 import { sValidator } from '@hono/standard-validator';
+import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { db } from '../db/index.db.js';
 import { products } from '../db/schemas/products.schemas.js';
@@ -6,8 +7,8 @@ import { apiKeyAuth } from '../middlewares/api-key-auth.middleware.js';
 import {
   createProductSchema,
   idParamSchema,
+  updateProductSchema,
 } from '../validators/product.validator.js';
-import { eq } from 'drizzle-orm';
 
 const app = new Hono();
 
@@ -18,8 +19,10 @@ app.get('/', async (c) => {
 
 app.get('/:id', sValidator('param', idParamSchema), async (c) => {
   const { id } = c.req.valid('param');
-  const product = await db.query.products.findFirst({ where: eq(products.id, id) });
-  
+  const product = await db.query.products.findFirst({
+    where: eq(products.id, id),
+  });
+
   if (!product) {
     return c.json({ message: 'Product not found' }, 404);
   }
@@ -39,35 +42,27 @@ app.post(
   },
 );
 
-// app.put(
-//   '/:id',
-//   sValidator('json', updateProductSchema),
-//   sValidator('param', idParamSchema),
-//   (c) => {
-//     const { id } = c.req.valid('param');
-//     const body = c.req.valid('json');
+app.put(
+  '/:id',
+  sValidator('json', updateProductSchema),
+  sValidator('param', idParamSchema),
+  async (c) => {
+    const { id } = c.req.valid('param');
+    const body = c.req.valid('json');
 
-//     // encontra o produto no array com base no ID fornecido
-//     const productIndex = products.findIndex((p) => p.id === id);
+    const product = await db
+      .update(products)
+      .set(body)
+      .where(eq(products.id, id))
+      .returning();
 
-//     // verifica se o produto existe antes de tentar atualizá-lo
-//     if (productIndex === -1) {
-//       return c.json({ message: 'Product not found' }, 404);
-//     }
+    if (product.length === 0) {
+      return c.json({ message: 'Product not found' }, 404);
+    }
 
-//     // atualiza o produto com os novos dados fornecidos
-//     const updatedProduct = {
-//       ...products[productIndex],
-//       ...body,
-//     };
-
-//     // substitui o produto antigo pelo atualizado no array
-//     products[productIndex] = updatedProduct;
-
-//     // retorna o produto atualizado
-//     return c.json(updatedProduct);
-//   },
-// );
+    return c.json(product);
+  },
+);
 
 // app.delete('/:id', sValidator('param', idParamSchema), (c) => {
 //   const { id } = c.req.valid('param');
